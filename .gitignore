@@ -3,3 +3,6 @@ __pycache__/
 *.pyc
 rustbpe/target/
 dev-ignore/
+download_cache
+work
+japanese_tokenizer/
