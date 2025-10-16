@@ -44,19 +44,23 @@ def iter_jp_parquet_files(start=0, step=1):
     """
     ローカルにキャッシュされた日本語Parquetファイルを効率的にイテレートする。
     """
-    from scripts.download_jp_dataset import get_jp_data_dir
-    data_dir = get_jp_data_dir()
+    # download_jp_dataset.pyはもう使わないので、直接パスを解決する
+    from nanochat.common import get_base_dir
+    data_dir = os.path.join(get_base_dir(), "jp_base_data")
 
     parquet_files = sorted([f for f in os.listdir(data_dir) if f.endswith('.parquet')])
     if not parquet_files:
         raise RuntimeError(f"No parquet files found in {data_dir}. Please run scripts/download_jp_dataset.py first.")
 
-    for i in range(start, len(parquet_files), step):
-        filepath = os.path.join(data_dir, parquet_files[i])
-        pf = pq.ParquetFile(filepath)
-        for rg_idx in range(pf.num_row_groups):
-            rg = pf.read_row_group(rg_idx)
-            yield rg.column('text').to_pylist()
+    # 念のため無限ループにして、データが足りなくなったら周回するようにする
+    while True:
+        for i in range(start, len(parquet_files), step):
+            filepath = os.path.join(data_dir, parquet_files[i])
+            pf = pq.ParquetFile(filepath)
+            for rg_idx in range(pf.num_row_groups):
+                rg = pf.read_row_group(rg_idx)
+                # ★★★ 修正点: 'text' を 'content' に変更 ★★★
+                yield rg.column('content').to_pylist()
 
 
 def get_jp_pretrain_batch_iterator(tokenizer, batch_size, context_length, device, ddp_rank, ddp_world_size):

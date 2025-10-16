@@ -40,7 +40,7 @@ AI投資は総額200兆円で「人類史上最大」
 将来の夢　
 映像系や脚本系を通って最終はゲームクリエイターになら予定です
 の細かいものは、これからブログ内で知っていってもらおうかなと思っています それでは、これから更新するブログを楽しみにしていてください！
-"""
+""".strip()
 
 # Random text I got from a random website this morning
 news_text = r"""
@@ -181,10 +181,20 @@ Photosynthesis is a photochemical energy transduction process in which light-har
 """.strip()
 
 # The tokenizer was trained on data from earlier shards, so it has seen this data
-train_docs = next(parquets_iter_batched(split="train"))
-train_text = "\n".join(train_docs)
-val_docs = next(parquets_iter_batched(split="val"))
-val_text = "\n".join(val_docs)
+train_text = ""
+val_text = ""
+
+try:
+    # fwe-trainのデータを読み込む
+    train_docs = next(parquets_iter_batched(split="train"))
+    train_text = "\n".join(train_docs)
+    # fwe-valのデータを読み込む
+    val_docs = next(parquets_iter_batched(split="val"))
+    val_text = "\n".join(val_docs)
+except StopIteration:
+    print("\nWARNING: English 'fineweb-edu' dataset not found. Skipping evaluation on fwe-train and fwe-val.")
+    print("This is expected if you are running a Japanese-only pipeline.\n")
+
 
 all_text = [
     ("news", news_text),
@@ -193,8 +203,10 @@ all_text = [
     ("math", math_text),
     ("science", science_text),
     ("japanese", japanese_text),
-    ("fwe-train", train_text),
 ]
+if train_text:
+    all_text.append(("fwe-train", train_text))
+
 if val_text:
     all_text.append(("fwe-val", val_text))
 

@@ -40,12 +40,13 @@ python -m nanochat.report reset
 # ------------------------------------------------------------------------------------------
 # Part 2: Tokenization
 # ------------------------------------------------------------------------------------------
+# トークナイザークラウドでおそすぎ問題
 TOKENIZER_FILE="$HOME/.cache/nanochat/tokenizer/tokenizer.pkl"
 if [ -f "$TOKENIZER_FILE" ]; then
     echo "Tokenizer already exists at $TOKENIZER_FILE. Skipping training."
 else
     echo "Starting Tokenizer training..."
-    python -m scripts.tok_train_jp --max_chars=2000000000
+    python -m scripts.tok_train_jp --max_chars=75000000
 fi
 python -m scripts.tok_eval
 
@@ -54,6 +55,10 @@ python -m scripts.tok_eval
 # ------------------------------------------------------------------------------------------
 echo "Pre-downloading Japanese dataset for pre-training..."
 python -m scripts.download_jp_dataset -n 100 # d20モデル用に100シャードをダウンロード
+
+# SFT用のデータセットも事前にダウンロード
+echo "Pre-downloading Japanese dataset for SFT..."
+python -m scripts.download_sft_jp_dataset
 
 # ------------------------------------------------------------------------------------------
 # Part 3: Base model (pretraining)
@@ -68,11 +73,10 @@ torchrun --standalone --nproc_per_node=8 -m scripts.base_train_jp_cloud -- \
 # Part 4: SFT (Supervised Fine-Tuning)
 # ------------------------------------------------------------------------------------------
 echo "Starting Japanese SFT on 8xH100..."
-# (SFTスクリプトは前回作成したものをそのまま使用)
 torchrun --standalone --nproc_per_node=8 -m scripts.chat_sft_jp_cloud -- \
     --num_epochs=1 \
     --device_batch_size=16 \
-    --target_examples_per_step=32 \
+    --target_examples_per_step=128 \
     --run=$WANDB_RUN
 
 # ------------------------------------------------------------------------------------------
