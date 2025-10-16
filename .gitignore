@@ -7,3 +7,4 @@ download_cache/
 download_cache_jp/
 work/
 japanese_tokenizer/
+wandb/
