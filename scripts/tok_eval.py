@@ -5,6 +5,43 @@ Evaluate compression ratio of the tokenizer.
 from nanochat.tokenizer import get_tokenizer, RustBPETokenizer
 from nanochat.dataset import parquets_iter_batched
 
+japanese_text = """【シリコンバレー=清水孝輔】
+米オープンAIが約200兆円のインフラ投資でいびつな取引を繰り返している。人工知能（AI）開発用半導体を調達するため、米エヌビディアなどから巨額資金の提供を受ける。売り手と買い手で資金循環する手法はIT（情報技術）バブル期に類似し、成長を実態以上に大きく見せ過剰投資を呼ぶ危うさがある。
+AI投資は総額200兆円で「人類史上最大」
+「AIインフラの構築は人類史上で最大...
+
+今世紀末に気温２．６度上昇　各国対策でも―パリ協定１０年で欧米研究
+時事通信 外経部2025年10月16日13時09分配信
+猛暑の中、ホースで水を浴びる男性＝２月１７日、ブラジル・リオデジャネイロ近郊（ＡＦＰ時事）
+
+　【ニューヨーク時事】欧米の気候研究者らで構成するチームは１６日、各国が発表済みの地球温暖化対策が完全に実施された場合でも、今世紀末に世界の気温は産業革命前から２．６度上昇するとの分析結果を明らかにした。対策の国際枠組み「パリ協定」が採択されてから１０年を迎える中、協定が掲げる目標達成には一層の対策強化が必要だと警鐘を鳴らした。
+
+気候変動「起きていない」　「史上最大の詐欺」と持論―トランプ米大統領
+
+　協定は２０１５年にフランスで開かれた国連気候変動枠組み条約第２１回締約国会議（ＣＯＰ２１）でまとまった。世界の気温上昇を「２度より十分低く保つとともに、１．５度に抑える努力を追求する」と規定。近年は研究が進み、温暖化による人々の健康や経済、社会への被害を避けるため、１．５度の目標が重視されている。
+
+ＤｅＮＡ打線、好機で肝心の一本出ず　ポストシーズン１０試合ぶり零封負け
+横浜ＤｅＮＡ０－２阪神（甲子園）
+３回横浜ＤｅＮＡ１死一、二塁、チャンスで三振に倒れた牧＝甲子園（花輪　久写す）
+
+横浜ＤｅＮＡ
+000 000 000｜0
+000 002 00X｜2
+阪神
+【評】阪神が少ない好機を生かした。六回に近本の三盗で揺さぶり、森下の中前打で先制し、小野寺の右前打で加点。先発村上が５回をしのぎ、及川ら救援陣も無失点でつないだ。横浜ＤｅＮＡは５度の先頭打者の出塁を生かせず、１２残塁だった。
+
+パッと雰囲気をみた感じでは、高校生は少ないのかなぁと感じましたが、同年代はいるんでしょうか
+普段はnoteというサイトにエッセイや詩、小説を綴っていますが、日記のような誰もが楽しめる日常ブログ書いてみたいと思ったのでこちらを始めさせていただきました
+ここでは、学生生活における日記や、それを通した人間関係(高校生の恋愛観など)についてを色々交えて書いていければ面白いかなと思います！
+まず、この場で、自己紹介をしておこうと思います。
+17(高校3年生)
+好きな食べ物　 カルボナーラ 趣味　
+映画、カラオケ、ダンス
+将来の夢　
+映像系や脚本系を通って最終はゲームクリエイターになら予定です
+の細かいものは、これからブログ内で知っていってもらおうかなと思っています それでは、これから更新するブログを楽しみにしていてください！
+"""
+
 # Random text I got from a random website this morning
 news_text = r"""
 (Washington, D.C., July 9, 2025)- Yesterday, Mexico’s National Service of Agro-Alimentary Health, Safety, and Quality (SENASICA) reported a new case of New World Screwworm (NWS) in Ixhuatlan de Madero, Veracruz in Mexico, which is approximately 160 miles northward of the current sterile fly dispersal grid, on the eastern side of the country and 370 miles south of the U.S./Mexico border. This new northward detection comes approximately two months after northern detections were reported in Oaxaca and Veracruz, less than 700 miles away from the U.S. border, which triggered the closure of our ports to Mexican cattle, bison, and horses on May 11, 2025.
@@ -155,6 +192,7 @@ all_text = [
     ("code", code_text),
     ("math", math_text),
     ("science", science_text),
+    ("japanese", japanese_text),
     ("fwe-train", train_text),
 ]
 if val_text:
