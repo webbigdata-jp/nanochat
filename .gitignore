@@ -4,5 +4,6 @@ __pycache__/
 rustbpe/target/
 dev-ignore/
 download_cache
+download_cache_jp
 work
 japanese_tokenizer/
