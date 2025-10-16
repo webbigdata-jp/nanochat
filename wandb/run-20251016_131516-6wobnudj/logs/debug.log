@@ -19,3 +19,8 @@ config: {'run': 'd20-jp-1760620493', 'depth': 20, 'max_seq_len': 2048, 'target_p
 2025-10-16 13:15:17,430 INFO    MainThread:17516 [wandb_run.py:_redirect():2426] Wrapping output streams.
 2025-10-16 13:15:17,430 INFO    MainThread:17516 [wandb_run.py:_redirect():2449] Redirects installed.
 2025-10-16 13:15:17,444 INFO    MainThread:17516 [wandb_init.py:init():1076] run started, returning control to user process
+2025-10-16 16:17:09,478 INFO    MainThread:17516 [wandb_run.py:_finish():2275] finishing run dahara1/nanochat-jp/6wobnudj
+2025-10-16 16:17:09,478 INFO    MainThread:17516 [wandb_run.py:_atexit_cleanup():2474] got exitcode: 0
+2025-10-16 16:17:09,479 INFO    MainThread:17516 [wandb_run.py:_restore():2456] restore
+2025-10-16 16:17:09,479 INFO    MainThread:17516 [wandb_run.py:_restore():2462] restore done
+2025-10-16 16:17:11,231 INFO    MainThread:17516 [wandb_run.py:_footer_sync_info():3872] logging synced files

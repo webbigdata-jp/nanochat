@@ -13,7 +13,7 @@ source = "base_jp"
 num_epochs = 1
 max_iterations = -1
 device_batch_size = 16
-target_examples_per_step = 32
+target_examples_per_step = 128 # 修正済みの値
 unembedding_lr = 0.004
 embedding_lr = 0.2
 matrix_lr = 0.02
@@ -44,11 +44,12 @@ def sft_data_generator(dataset, tokenizer, batch_size, ddp_rank, ddp_world_size,
             doc = dataset[i]; ids, mask = tokenizer.render_conversation(doc); batch.append((ids, mask))
             if len(batch) == batch_size: yield collate_and_yield(batch); batch = []
 
+
+# --- メイン実行部 ---
 def main():
     ddp, ddp_rank, ddp_local_rank, ddp_world_size, device = compute_init()
     master_process = ddp_rank == 0
     autocast_ctx = torch.amp.autocast(device_type="cuda", dtype=torch.bfloat16)
-
     use_dummy_wandb = run == "dummy" or not master_process
     wandb_run = DummyWandb() if use_dummy_wandb else wandb.init(project="nanochat-jp", name=run, config=user_config)
 
@@ -62,26 +63,32 @@ def main():
     for opt in optimizers:
         for group in opt.param_groups: group["lr"] *= init_lr_frac; group["initial_lr"] = group["lr"]
 
-    global num_iterations
-    if num_iterations < 0:
+    if max_iterations < 0:
         num_iterations = (len(train_ds) // target_examples_per_step) * num_epochs
+    else:
+        num_iterations = max_iterations
+    
     examples_per_step = device_batch_size * ddp_world_size
     grad_accum_steps = target_examples_per_step // examples_per_step
     
-    print0(f"Starting SFT for {num_iterations} iterations...")
+    print0(f"Starting SFT for {num_iterations} iterations with grad_accum_steps = {grad_accum_steps}...")
     final_loss = 0.0
+    model.train() # ループの外で一度だけtrainモードに
     for step in range(num_iterations):
-        model.train()
+        
         for micro_step in range(grad_accum_steps):
             train_inputs, train_targets = next(train_loader)
-            with autocast_ctx: loss = model(train_inputs, train_targets)
+            with autocast_ctx:
+                loss = model(train_inputs, train_targets)
             loss = loss / grad_accum_steps
             loss.backward()
-        for opt in optimizers: opt.step()
+
+        for opt in optimizers:
+            opt.step()
         model.zero_grad(set_to_none=True)
 
         if step % 10 == 0 or step == num_iterations - 1:
-            lossf = loss.item() * grad_accum_steps
+            lossf = loss.item() * grad_accum_steps # 表示用に元のスケールに戻す
             final_loss = lossf
             print0(f"Step {step:05d}/{num_iterations:05d} | loss: {lossf:.6f}")
             wandb_run.log({"step": step, "train/sft_loss": lossf})

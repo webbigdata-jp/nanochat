@@ -35,39 +35,7 @@ if [ -z "$WANDB_API_KEY" ]; then
     echo "WARNING: WANDB_API_KEY is not set. Using dummy logger."
     export WANDB_RUN="dummy"
 fi
-python -m nanochat.report reset
-
-# ------------------------------------------------------------------------------------------
-# Part 2: Tokenization
-# ------------------------------------------------------------------------------------------
-# トークナイザークラウドでおそすぎ問題
-TOKENIZER_FILE="$HOME/.cache/nanochat/tokenizer/tokenizer.pkl"
-if [ -f "$TOKENIZER_FILE" ]; then
-    echo "Tokenizer already exists at $TOKENIZER_FILE. Skipping training."
-else
-    echo "Starting Tokenizer training..."
-    python -m scripts.tok_train_jp --max_chars=75000000
-fi
-python -m scripts.tok_eval
-
-# ------------------------------------------------------------------------------------------
-# Part 2.5: Pre-download Japanese Dataset for Pre-training
-# ------------------------------------------------------------------------------------------
-echo "Pre-downloading Japanese dataset for pre-training..."
-python -m scripts.download_jp_dataset -n 100 # d20モデル用に100シャードをダウンロード
-
-# SFT用のデータセットも事前にダウンロード
-echo "Pre-downloading Japanese dataset for SFT..."
-python -m scripts.download_sft_jp_dataset
-
-# ------------------------------------------------------------------------------------------
-# Part 3: Base model (pretraining)
-# ------------------------------------------------------------------------------------------
-echo "Starting Japanese pre-training on 8xH100..."
-torchrun --standalone --nproc_per_node=8 -m scripts.base_train_jp_cloud -- \
-    --depth=20 \
-    --device_batch_size=32 \
-    --run=$WANDB_RUN
+#python -m nanochat.report reset
 
 # ------------------------------------------------------------------------------------------
 # Part 4: SFT (Supervised Fine-Tuning)
